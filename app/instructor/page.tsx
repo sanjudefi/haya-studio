@@ -6,6 +6,7 @@ import { getSession, getDemoStore, saveDemoStore } from "@/lib/demoStore";
 import { TimeSlot, Leave, DateOverride } from "@/lib/demoData";
 import { getDayName, getNext7DaysAvailability } from "@/lib/availability";
 import DashboardLayout from "../components/DashboardLayout";
+import TimelineVisualization from "../components/TimelineVisualization";
 
 const DAYS = [
   { num: 1, short: "Mon", full: "Monday" },
@@ -25,8 +26,10 @@ export default function InstructorPage() {
   const [selectedDay, setSelectedDay] = useState(1);
   const [newSlotStart, setNewSlotStart] = useState("09:00");
   const [newSlotEnd, setNewSlotEnd] = useState("17:00");
+  const [open24Hours, setOpen24Hours] = useState(false);
   const [weeklySlots, setWeeklySlots] = useState<{ [day: number]: TimeSlot[] }>({});
   const [preview, setPreview] = useState<any[]>([]);
+  const [slotError, setSlotError] = useState("");
 
   // Holiday/Special Hours state
   const [holidayDate, setHolidayDate] = useState("");
@@ -73,18 +76,73 @@ export default function InstructorPage() {
     setPreview(previewData);
   };
 
+  // Convert time string to minutes for comparison
+  const timeToMinutes = (time: string): number => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
+  // Check if two time slots overlap
+  const slotsOverlap = (slot1: TimeSlot, slot2: TimeSlot): boolean => {
+    const start1 = timeToMinutes(slot1.start);
+    const end1 = timeToMinutes(slot1.end);
+    const start2 = timeToMinutes(slot2.start);
+    const end2 = timeToMinutes(slot2.end);
+
+    return (start1 < end2 && end1 > start2);
+  };
+
+  // Validate new slot
+  const validateSlot = (newSlot: TimeSlot, existingSlots: TimeSlot[]): string | null => {
+    const startMinutes = timeToMinutes(newSlot.start);
+    const endMinutes = timeToMinutes(newSlot.end);
+
+    if (endMinutes <= startMinutes) {
+      return "End time must be after start time";
+    }
+
+    for (const slot of existingSlots) {
+      if (slotsOverlap(newSlot, slot)) {
+        return `Time slot overlaps with existing slot (${slot.start} - ${slot.end})`;
+      }
+    }
+
+    return null;
+  };
+
   const handleAddSlot = () => {
     const session = getSession();
     if (!session || !session.instructorId) return;
+
+    setSlotError("");
+
+    let slotStart = newSlotStart;
+    let slotEnd = newSlotEnd;
+
+    // If "Open 24 Hours" is checked, override times
+    if (open24Hours) {
+      slotStart = "00:00";
+      slotEnd = "23:59";
+    }
+
+    const newSlot: TimeSlot = { start: slotStart, end: slotEnd };
+    const existingSlots = weeklySlots[selectedDay] || [];
+
+    // Validate the slot
+    const error = validateSlot(newSlot, existingSlots);
+    if (error) {
+      setSlotError(error);
+      return;
+    }
 
     const newSlots = { ...weeklySlots };
     if (!newSlots[selectedDay]) {
       newSlots[selectedDay] = [];
     }
-    newSlots[selectedDay] = [
-      ...newSlots[selectedDay],
-      { start: newSlotStart, end: newSlotEnd },
-    ];
+    newSlots[selectedDay] = [...newSlots[selectedDay], newSlot];
+
+    // Sort slots by start time
+    newSlots[selectedDay].sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
 
     setWeeklySlots(newSlots);
 
@@ -92,6 +150,11 @@ export default function InstructorPage() {
     store.weeklyRules[session.instructorId] = newSlots;
     saveDemoStore(store);
     loadPreview(session.instructorId);
+
+    // Reset form
+    if (open24Hours) {
+      setOpen24Hours(false);
+    }
   };
 
   const handleDeleteSlot = (day: number, index: number) => {
@@ -210,19 +273,55 @@ export default function InstructorPage() {
             </div>
           </div>
 
+          {/* Timeline Visualization */}
+          <div className="mb-6">
+            <h3 className="text-sm font-medium text-dark-600 mb-3">
+              {DAYS.find((d) => d.num === selectedDay)?.full} Schedule
+            </h3>
+            <TimelineVisualization slots={weeklySlots[selectedDay] || []} />
+          </div>
+
           {/* Time Selection */}
           <div className="bg-dark-200 rounded-lg p-4 mb-6">
             <h3 className="text-sm font-medium text-dark-600 mb-3">
               Add time slot for {DAYS.find((d) => d.num === selectedDay)?.full}
             </h3>
+
+            {/* Open 24 Hours Checkbox */}
+            <div className="mb-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={open24Hours}
+                  onChange={(e) => {
+                    setOpen24Hours(e.target.checked);
+                    if (e.target.checked) {
+                      setNewSlotStart("00:00");
+                      setNewSlotEnd("23:59");
+                    } else {
+                      setNewSlotStart("09:00");
+                      setNewSlotEnd("17:00");
+                    }
+                    setSlotError("");
+                  }}
+                  className="w-4 h-4 text-primary-600 bg-dark-300 border-dark-400 rounded focus:ring-primary-500"
+                />
+                <span className="text-sm text-dark-600">Open 24 Hours</span>
+              </label>
+            </div>
+
             <div className="flex gap-3 flex-wrap">
               <div className="flex-1 min-w-[120px]">
                 <label className="block text-xs text-dark-500 mb-1">Start Time</label>
                 <input
                   type="time"
                   value={newSlotStart}
-                  onChange={(e) => setNewSlotStart(e.target.value)}
-                  className="w-full px-3 py-2 bg-dark-300 border border-dark-400 text-white rounded-lg focus:ring-2 focus:ring-primary-500"
+                  onChange={(e) => {
+                    setNewSlotStart(e.target.value);
+                    setSlotError("");
+                  }}
+                  disabled={open24Hours}
+                  className="w-full px-3 py-2 bg-dark-300 border border-dark-400 text-white rounded-lg focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
               <div className="flex-1 min-w-[120px]">
@@ -230,8 +329,12 @@ export default function InstructorPage() {
                 <input
                   type="time"
                   value={newSlotEnd}
-                  onChange={(e) => setNewSlotEnd(e.target.value)}
-                  className="w-full px-3 py-2 bg-dark-300 border border-dark-400 text-white rounded-lg focus:ring-2 focus:ring-primary-500"
+                  onChange={(e) => {
+                    setNewSlotEnd(e.target.value);
+                    setSlotError("");
+                  }}
+                  disabled={open24Hours}
+                  className="w-full px-3 py-2 bg-dark-300 border border-dark-400 text-white rounded-lg focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
               <div className="flex items-end">
@@ -243,37 +346,67 @@ export default function InstructorPage() {
                 </button>
               </div>
             </div>
+
+            {/* Error Message */}
+            {slotError && (
+              <div className="mt-3 bg-red-500/10 border border-red-500/30 text-red-400 px-3 py-2 rounded-lg text-sm">
+                {slotError}
+              </div>
+            )}
           </div>
 
-          {/* Current Schedule Display */}
-          <div className="space-y-3">
-            {DAYS.map((day) => (
-              <div key={day.num}>
-                {weeklySlots[day.num] && weeklySlots[day.num].length > 0 && (
-                  <div className="bg-dark-200 rounded-lg p-4">
-                    <h3 className="font-medium text-white mb-3">{day.full}</h3>
-                    <div className="space-y-2">
-                      {weeklySlots[day.num].map((slot, idx) => (
-                        <div
-                          key={idx}
-                          className="flex justify-between items-center bg-dark-300 px-4 py-2.5 rounded-lg border border-dark-400"
-                        >
-                          <span className="text-dark-600 font-medium">
-                            {slot.start} - {slot.end}
-                          </span>
-                          <button
-                            onClick={() => handleDeleteSlot(day.num, idx)}
-                            className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      ))}
+          {/* Current Slots for Selected Day */}
+          {weeklySlots[selectedDay] && weeklySlots[selectedDay].length > 0 && (
+            <div className="bg-dark-200 rounded-lg p-4 mb-6">
+              <h3 className="text-sm font-medium text-dark-600 mb-3">
+                Current slots for {DAYS.find((d) => d.num === selectedDay)?.full}
+              </h3>
+              <div className="space-y-2">
+                {weeklySlots[selectedDay].map((slot, idx) => (
+                  <div
+                    key={idx}
+                    className="flex justify-between items-center bg-dark-300 px-4 py-2.5 rounded-lg border border-dark-400"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-primary-500 rounded-full"></div>
+                      <span className="text-white font-medium">
+                        {slot.start} - {slot.end}
+                      </span>
                     </div>
+                    <button
+                      onClick={() => handleDeleteSlot(selectedDay, idx)}
+                      className="text-red-400 hover:text-red-300 text-sm font-medium transition-colors"
+                    >
+                      Delete
+                    </button>
                   </div>
-                )}
+                ))}
               </div>
-            ))}
+            </div>
+          )}
+
+          {/* All Days Summary */}
+          <div className="border-t border-dark-300 pt-6">
+            <h3 className="text-sm font-medium text-dark-600 mb-4">Weekly Summary</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {DAYS.map((day) => (
+                <div
+                  key={day.num}
+                  className={`p-3 rounded-lg border ${
+                    weeklySlots[day.num] && weeklySlots[day.num].length > 0
+                      ? "bg-primary-600/10 border-primary-600/30"
+                      : "bg-dark-300 border-dark-400"
+                  }`}
+                >
+                  <div className="font-medium text-white text-sm mb-1">{day.full}</div>
+                  <div className="text-xs text-dark-500">
+                    {weeklySlots[day.num] && weeklySlots[day.num].length > 0
+                      ? `${weeklySlots[day.num].length} slot${weeklySlots[day.num].length > 1 ? "s" : ""}`
+                      : "Closed"}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 

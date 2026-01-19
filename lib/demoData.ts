@@ -3,6 +3,7 @@ export interface Instructor {
   name: string;
   specialization: string;
   languages: string[];
+  avatarUrl?: string;
 }
 
 export interface TimeSlot {
@@ -52,60 +53,70 @@ export const DEMO_INSTRUCTORS: Instructor[] = [
     name: "Sarah Al-Mansouri",
     specialization: "Yoga",
     languages: ["English"],
+    avatarUrl: "https://randomuser.me/api/portraits/women/44.jpg",
   },
   {
     id: "inst-2",
     name: "Ahmed Hassan",
     specialization: "Strength",
     languages: ["English"],
+    avatarUrl: "https://randomuser.me/api/portraits/men/32.jpg",
   },
   {
     id: "inst-3",
     name: "Fatima Khan",
     specialization: "Gym",
     languages: ["English"],
+    avatarUrl: "https://randomuser.me/api/portraits/women/65.jpg",
   },
   {
     id: "inst-4",
     name: "Mohamed Ali",
     specialization: "Meditation",
     languages: ["English"],
+    avatarUrl: "https://randomuser.me/api/portraits/men/46.jpg",
   },
   {
     id: "inst-5",
     name: "Layla Ibrahim",
     specialization: "Cardio",
     languages: ["English"],
+    avatarUrl: "https://randomuser.me/api/portraits/women/28.jpg",
   },
   {
     id: "inst-6",
     name: "Omar Rashid",
     specialization: "Pilates",
     languages: ["English"],
+    avatarUrl: "https://randomuser.me/api/portraits/men/71.jpg",
   },
   {
     id: "inst-7",
     name: "Aisha Mohammed",
     specialization: "Zumba",
     languages: ["English"],
+    avatarUrl: "https://randomuser.me/api/portraits/women/90.jpg",
   },
   {
     id: "inst-8",
     name: "Khalid Saeed",
     specialization: "Mobility",
     languages: ["English"],
+    avatarUrl: "https://randomuser.me/api/portraits/men/54.jpg",
   },
   {
     id: "inst-9",
     name: "Noor Abdullah",
     specialization: "CrossFit",
     languages: ["English"],
+    avatarUrl: "https://randomuser.me/api/portraits/women/12.jpg",
   },
   {
     id: "inst-10",
     name: "Yasmin Farooq",
     specialization: "Breathwork",
     languages: ["English"],
+    avatarUrl: "https://randomuser.me/api/portraits/women/79.jpg",
   },
 ];
 

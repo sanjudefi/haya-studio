@@ -49,6 +49,7 @@ export default function ManagerPage() {
       return {
         name: instructor.name,
         specialization: instructor.specialization,
+        avatarUrl: instructor.avatarUrl,
         status: avail.status,
         text,
       };
@@ -67,14 +68,21 @@ export default function ManagerPage() {
 
     try {
       const dateObj = new Date(selectedDate + "T00:00:00");
+
+      // Filter for available instructors only
+      const availableInstructors = availability
+        .filter((a) => a.status === "available")
+        .map((a) => ({
+          name: a.name,
+          specialization: a.specialization,
+          avatarUrl: a.avatarUrl || "https://randomuser.me/api/portraits/lego/1.jpg",
+          statusText: a.text,
+        }));
+
       const payload = {
         studioName: DEMO_STUDIO.name,
         date: formatDateFull(dateObj),
-        instructors: availability.map((a) => ({
-          name: a.name,
-          specialization: a.specialization,
-          statusText: a.text,
-        })),
+        instructors: availableInstructors,
       };
 
       const response = await fetch("/api/snapshot", {
