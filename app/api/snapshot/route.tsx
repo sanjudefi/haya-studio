@@ -25,7 +25,7 @@ export async function POST(request: Request) {
             height: "100%",
             display: "flex",
             flexDirection: "column",
-            backgroundColor: "#ffffff",
+            background: "linear-gradient(135deg, #09090b 0%, #18181b 100%)",
             padding: "60px",
           }}
         >
@@ -39,18 +39,20 @@ export async function POST(request: Request) {
           >
             <div
               style={{
-                fontSize: "48px",
+                fontSize: "52px",
                 fontWeight: "bold",
-                color: "#0369a1",
-                marginBottom: "12px",
+                color: "#ffffff",
+                marginBottom: "8px",
+                letterSpacing: "-0.02em",
               }}
             >
               {studioName}
             </div>
             <div
               style={{
-                fontSize: "32px",
-                color: "#475569",
+                fontSize: "28px",
+                color: "#14b8a6",
+                fontWeight: "600",
               }}
             >
               {date}
@@ -61,9 +63,10 @@ export async function POST(request: Request) {
           <div
             style={{
               width: "100%",
-              height: "3px",
-              backgroundColor: "#0ea5e9",
+              height: "4px",
+              background: "linear-gradient(90deg, #14b8a6 0%, #0d9488 100%)",
               marginBottom: "40px",
+              borderRadius: "2px",
             }}
           />
 
@@ -72,24 +75,25 @@ export async function POST(request: Request) {
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: "16px",
+              gap: "12px",
             }}
           >
             {/* Table Header */}
             <div
               style={{
                 display: "flex",
-                backgroundColor: "#f1f5f9",
-                padding: "20px 24px",
-                borderRadius: "8px",
+                backgroundColor: "#27272a",
+                padding: "18px 24px",
+                borderRadius: "12px",
+                border: "1px solid #3f3f46",
               }}
             >
               <div
                 style={{
                   flex: "2",
-                  fontSize: "24px",
+                  fontSize: "22px",
                   fontWeight: "600",
-                  color: "#0f172a",
+                  color: "#a1a1aa",
                 }}
               >
                 Instructor
@@ -97,9 +101,9 @@ export async function POST(request: Request) {
               <div
                 style={{
                   flex: "1",
-                  fontSize: "24px",
+                  fontSize: "22px",
                   fontWeight: "600",
-                  color: "#0f172a",
+                  color: "#a1a1aa",
                 }}
               >
                 Specialization
@@ -107,12 +111,12 @@ export async function POST(request: Request) {
               <div
                 style={{
                   flex: "2",
-                  fontSize: "24px",
+                  fontSize: "22px",
                   fontWeight: "600",
-                  color: "#0f172a",
+                  color: "#a1a1aa",
                 }}
               >
-                Availability
+                Status
               </div>
             </div>
 
@@ -122,17 +126,17 @@ export async function POST(request: Request) {
                 key={index}
                 style={{
                   display: "flex",
-                  padding: "20px 24px",
-                  backgroundColor: index % 2 === 0 ? "#ffffff" : "#f8fafc",
-                  borderRadius: "8px",
-                  border: "1px solid #e2e8f0",
+                  padding: "18px 24px",
+                  backgroundColor: index % 2 === 0 ? "#18181b" : "#09090b",
+                  borderRadius: "12px",
+                  border: "1px solid #27272a",
                 }}
               >
                 <div
                   style={{
                     flex: "2",
-                    fontSize: "22px",
-                    color: "#1e293b",
+                    fontSize: "20px",
+                    color: "#fafafa",
                     fontWeight: "500",
                   }}
                 >
@@ -141,8 +145,8 @@ export async function POST(request: Request) {
                 <div
                   style={{
                     flex: "1",
-                    fontSize: "20px",
-                    color: "#475569",
+                    fontSize: "18px",
+                    color: "#a1a1aa",
                   }}
                 >
                   {instructor.specialization}
@@ -150,9 +154,9 @@ export async function POST(request: Request) {
                 <div
                   style={{
                     flex: "2",
-                    fontSize: "20px",
+                    fontSize: "18px",
                     color: getStatusColor(instructor.statusText),
-                    fontWeight: "500",
+                    fontWeight: "600",
                   }}
                 >
                   {instructor.statusText}
@@ -166,9 +170,10 @@ export async function POST(request: Request) {
             style={{
               marginTop: "auto",
               paddingTop: "40px",
-              fontSize: "18px",
-              color: "#94a3b8",
+              fontSize: "16px",
+              color: "#52525b",
               textAlign: "center",
+              fontWeight: "500",
             }}
           >
             Generated by Haya Studio Demo
@@ -188,10 +193,10 @@ export async function POST(request: Request) {
 
 function getStatusColor(statusText: string): string {
   if (statusText.includes("On Leave")) {
-    return "#ca8a04";
+    return "#facc15";
   }
   if (statusText === "Not Available") {
-    return "#64748b";
+    return "#71717a";
   }
-  return "#059669";
+  return "#14b8a6";
 }

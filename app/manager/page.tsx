@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getSession, getDemoStore, clearSession } from "@/lib/demoStore";
+import { getSession, getDemoStore } from "@/lib/demoStore";
 import { DEMO_STUDIO } from "@/lib/demoData";
 import {
   getInstructorAvailability,
@@ -10,6 +10,7 @@ import {
   formatDate,
   formatDateFull,
 } from "@/lib/availability";
+import DashboardLayout from "../components/DashboardLayout";
 
 export default function ManagerPage() {
   const router = useRouter();
@@ -105,79 +106,203 @@ export default function ManagerPage() {
     }
   };
 
-  const handleLogout = () => {
-    clearSession();
-    router.push("/login");
-  };
-
   if (!mounted) {
     return null;
   }
 
+  const totalInstructors = availability.length;
+  const availableToday = availability.filter((a) => a.status === "available").length;
+  const closedToday = availability.filter((a) => a.status === "not-available").length;
+  const onLeaveToday = availability.filter((a) => a.status === "on-leave").length;
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {DEMO_STUDIO.name}
-              </h1>
-              <p className="text-sm text-gray-600">
-                Manager Dashboard • {DEMO_STUDIO.timezone}
-              </p>
+    <DashboardLayout
+      title="Manager Dashboard"
+      subtitle={`${DEMO_STUDIO.name} • ${DEMO_STUDIO.timezone}`}
+      currentPage="manager"
+      userRole="MANAGER"
+    >
+      <div className="space-y-6">
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-dark-100 border border-dark-200 rounded-xl p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-dark-500 text-sm font-medium">Total Instructors</p>
+                <p className="text-3xl font-bold text-white mt-2">{totalInstructors}</p>
+              </div>
+              <div className="p-3 bg-primary-600/20 rounded-lg">
+                <svg
+                  className="w-8 h-8 text-primary-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+              </div>
             </div>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 text-sm text-gray-700 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              Logout
-            </button>
+          </div>
+
+          <div className="bg-dark-100 border border-dark-200 rounded-xl p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-dark-500 text-sm font-medium">Available Today</p>
+                <p className="text-3xl font-bold text-primary-400 mt-2">{availableToday}</p>
+              </div>
+              <div className="p-3 bg-green-600/20 rounded-lg">
+                <svg
+                  className="w-8 h-8 text-green-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-dark-100 border border-dark-200 rounded-xl p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-dark-500 text-sm font-medium">On Leave</p>
+                <p className="text-3xl font-bold text-yellow-400 mt-2">{onLeaveToday}</p>
+              </div>
+              <div className="p-3 bg-yellow-600/20 rounded-lg">
+                <svg
+                  className="w-8 h-8 text-yellow-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-dark-100 border border-dark-200 rounded-xl p-6 shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-dark-500 text-sm font-medium">Not Available</p>
+                <p className="text-3xl font-bold text-dark-500 mt-2">{closedToday}</p>
+              </div>
+              <div className="p-3 bg-red-600/20 rounded-lg">
+                <svg
+                  className="w-8 h-8 text-red-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+            </div>
           </div>
         </div>
-      </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-sm border p-6">
+        {/* Availability Table */}
+        <div className="bg-dark-100 rounded-xl shadow-xl border border-dark-200 p-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 className="text-xl font-bold text-white">
                 Instructor Availability
               </h2>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-dark-500 mt-1">
                 View and download daily schedules
               </p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => handleDateChange(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="px-4 py-2 bg-dark-200 border border-dark-300 text-white rounded-lg focus:ring-2 focus:ring-primary-500 transition-all"
               />
               <button
                 onClick={handleDownloadSnapshot}
                 disabled={downloading}
-                className="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                className="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary-600/30 hover:shadow-xl hover:shadow-primary-600/40"
               >
-                {downloading ? "Generating..." : "Download PNG"}
+                {downloading ? (
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="animate-spin h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Generating...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                      />
+                    </svg>
+                    Download PNG
+                  </span>
+                )}
               </button>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scrollbar-thin">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-semibold text-gray-900">
+                <tr className="border-b border-dark-300">
+                  <th className="text-left py-3 px-4 font-semibold text-dark-600">
                     Instructor
                   </th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-900">
+                  <th className="text-left py-3 px-4 font-semibold text-dark-600">
                     Specialization
                   </th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-900">
-                    Availability
+                  <th className="text-left py-3 px-4 font-semibold text-dark-600">
+                    Status
                   </th>
                 </tr>
               </thead>
@@ -185,22 +310,24 @@ export default function ManagerPage() {
                 {availability.map((item, idx) => (
                   <tr
                     key={idx}
-                    className="border-b border-gray-100 hover:bg-gray-50"
+                    className={`border-b border-dark-200 hover:bg-dark-200 transition-colors ${
+                      idx % 2 === 0 ? "bg-dark-100" : "bg-dark-50"
+                    }`}
                   >
-                    <td className="py-3 px-4 font-medium text-gray-900">
+                    <td className="py-4 px-4 font-medium text-white">
                       {item.name}
                     </td>
-                    <td className="py-3 px-4 text-gray-700">
+                    <td className="py-4 px-4 text-dark-600">
                       {item.specialization}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-4 px-4">
                       <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                        className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium ${
                           item.status === "available"
-                            ? "bg-green-100 text-green-800"
+                            ? "bg-primary-600/20 text-primary-400 border border-primary-600/30"
                             : item.status === "on-leave"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-gray-100 text-gray-800"
+                            ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
+                            : "bg-dark-200 text-dark-500 border border-dark-300"
                         }`}
                       >
                         {item.text}
@@ -213,15 +340,33 @@ export default function ManagerPage() {
           </div>
         </div>
 
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-900 mb-2">Demo Mode</h3>
-          <p className="text-sm text-blue-800">
-            This is a capability demonstration. All data is stored locally in your
-            browser. The PNG snapshot feature showcases how daily schedules can be
-            exported and shared.
-          </p>
+        {/* Demo Info */}
+        <div className="bg-primary-600/10 border border-primary-600/30 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <svg
+              className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <div>
+              <h3 className="font-semibold text-primary-400 mb-1">Demo Mode</h3>
+              <p className="text-sm text-primary-300/80">
+                This is a capability demonstration. All data is stored locally in your
+                browser. The PNG snapshot feature showcases how daily schedules can be
+                exported and shared.
+              </p>
+            </div>
+          </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
