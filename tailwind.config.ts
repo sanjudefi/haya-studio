@@ -22,16 +22,16 @@ const config: Config = {
           900: '#134e4a',
         },
         dark: {
-          50: '#18181b',
-          100: '#27272a',
-          200: '#3f3f46',
-          300: '#52525b',
-          400: '#71717a',
-          500: '#a1a1aa',
-          600: '#d4d4d8',
-          700: '#e4e4e7',
-          800: '#f4f4f5',
-          900: '#fafafa',
+          50: '#09090b',   // darkest background
+          100: '#18181b',  // card background
+          200: '#27272a',  // hover/secondary
+          300: '#3f3f46',  // borders
+          400: '#52525b',  // disabled
+          500: '#71717a',  // muted text
+          600: '#a1a1aa',  // secondary text
+          700: '#d4d4d8',  // primary text
+          800: '#e4e4e7',  // lighter text
+          900: '#fafafa',  // white text
         },
       },
       fontFamily: {
