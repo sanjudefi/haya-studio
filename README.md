@@ -2,6 +2,8 @@
 
 A Next.js 14 demo application showcasing studio scheduling capabilities with instructor availability management and PNG snapshot generation.
 
+> **🚀 Deploying to Vercel?** See [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md) for complete deployment instructions and troubleshooting.
+
 ## Features
 
 - **Manager Dashboard**: View all instructor availability for any date
@@ -56,20 +58,20 @@ npm start
 
 ### Deploy to Vercel
 
-1. **Install Vercel CLI** (optional):
-```bash
-npm i -g vercel
-```
+**⚠️ IMPORTANT**: If you get a "No Output Directory" error, you need to configure the Framework Preset in Vercel. See [VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md) for complete instructions.
 
-2. **Deploy**:
-```bash
-vercel
-```
+**Quick Deploy**:
 
-Or simply:
-- Push to GitHub
-- Connect repository to Vercel
-- Deploy automatically
+1. Push to GitHub
+2. Import to Vercel
+3. **Set Framework Preset to "Next.js"** in project settings
+4. Deploy
+
+**Via Vercel CLI**:
+```bash
+vercel --force
+# Set Framework Preset to Next.js when prompted
+```
 
 ### Environment Variables
 
