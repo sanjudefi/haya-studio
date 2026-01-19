@@ -79,6 +79,17 @@ export default function ManagerPage() {
           statusText: a.text,
         }));
 
+      // Notify if no instructors available
+      if (availableInstructors.length === 0) {
+        const proceed = confirm(
+          `No instructors are available on ${formatDateFull(dateObj)}. The snapshot will show an empty state. Do you want to continue?`
+        );
+        if (!proceed) {
+          setDownloading(false);
+          return;
+        }
+      }
+
       const payload = {
         studioName: DEMO_STUDIO.name,
         date: formatDateFull(dateObj),
@@ -94,10 +105,20 @@ export default function ManagerPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate snapshot");
+        const errorText = await response.text();
+        console.error("Snapshot API error:", errorText);
+        throw new Error(`Failed to generate snapshot: ${response.status}`);
       }
 
       const blob = await response.blob();
+
+      // Verify blob size
+      if (blob.size === 0) {
+        throw new Error("Generated image is empty");
+      }
+
+      console.log(`PNG generated successfully: ${blob.size} bytes, ${availableInstructors.length} instructors`);
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -108,7 +129,7 @@ export default function ManagerPage() {
       document.body.removeChild(a);
     } catch (error) {
       console.error("Error downloading snapshot:", error);
-      alert("Failed to download snapshot. Please try again.");
+      alert(`Failed to download snapshot: ${error instanceof Error ? error.message : "Unknown error"}. Check console for details.`);
     } finally {
       setDownloading(false);
     }

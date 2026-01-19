@@ -32,7 +32,8 @@ export default function InstructorPage() {
   const [slotError, setSlotError] = useState("");
 
   // Holiday/Special Hours state
-  const [holidayDate, setHolidayDate] = useState("");
+  const [holidayFromDate, setHolidayFromDate] = useState("");
+  const [holidayToDate, setHolidayToDate] = useState("");
   const [holidayType, setHolidayType] = useState<"closed" | "custom">("closed");
   const [holidayStart, setHolidayStart] = useState("09:00");
   const [holidayEnd, setHolidayEnd] = useState("17:00");
@@ -179,20 +180,34 @@ export default function InstructorPage() {
     const session = getSession();
     if (!session || !session.instructorId) return;
 
-    if (!holidayDate) {
-      alert("Please select a date");
+    if (!holidayFromDate) {
+      alert("Please select a start date");
       return;
     }
 
     const newOverrides = { ...overrides };
 
-    if (holidayType === "closed") {
-      newOverrides[holidayDate] = { available: false };
-    } else {
-      newOverrides[holidayDate] = {
-        available: true,
-        slots: [{ start: holidayStart, end: holidayEnd }],
-      };
+    // Determine the date range
+    const fromDate = new Date(holidayFromDate + "T00:00:00");
+    const toDate = holidayToDate ? new Date(holidayToDate + "T00:00:00") : fromDate;
+
+    // Validate date range
+    if (toDate < fromDate) {
+      alert("End date must be after start date");
+      return;
+    }
+
+    // Create override object
+    const overrideValue: DateOverride = holidayType === "closed"
+      ? { available: false }
+      : { available: true, slots: [{ start: holidayStart, end: holidayEnd }] };
+
+    // Apply to all dates in range
+    const currentDate = new Date(fromDate);
+    while (currentDate <= toDate) {
+      const dateString = currentDate.toISOString().split("T")[0];
+      newOverrides[dateString] = overrideValue;
+      currentDate.setDate(currentDate.getDate() + 1);
     }
 
     setOverrides(newOverrides);
@@ -204,7 +219,9 @@ export default function InstructorPage() {
     store.overrides[session.instructorId] = newOverrides;
     saveDemoStore(store);
 
-    setHolidayDate("");
+    // Clear form
+    setHolidayFromDate("");
+    setHolidayToDate("");
     loadPreview(session.instructorId);
   };
 
@@ -421,47 +438,61 @@ export default function InstructorPage() {
 
           {/* Add Holiday Form */}
           <div className="bg-dark-200 rounded-lg p-4 mb-6">
+            {/* Date Range Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-sm font-medium text-dark-600 mb-2">
-                  Select Date
+                  From Date
                 </label>
                 <input
                   type="date"
-                  value={holidayDate}
-                  onChange={(e) => setHolidayDate(e.target.value)}
+                  value={holidayFromDate}
+                  onChange={(e) => setHolidayFromDate(e.target.value)}
                   className="w-full px-3 py-2 bg-dark-300 border border-dark-400 text-white rounded-lg focus:ring-2 focus:ring-primary-500"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-dark-600 mb-2">
-                  Availability Type
+                  To Date (Optional)
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setHolidayType("closed")}
-                    className={`py-2 px-4 rounded-lg font-medium text-sm transition-all ${
-                      holidayType === "closed"
-                        ? "bg-red-600 text-white"
-                        : "bg-dark-300 text-dark-600 hover:bg-dark-400"
-                    }`}
-                  >
-                    Closed
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setHolidayType("custom")}
-                    className={`py-2 px-4 rounded-lg font-medium text-sm transition-all ${
-                      holidayType === "custom"
-                        ? "bg-primary-600 text-white"
-                        : "bg-dark-300 text-dark-600 hover:bg-dark-400"
-                    }`}
-                  >
-                    Custom Hours
-                  </button>
-                </div>
+                <input
+                  type="date"
+                  value={holidayToDate}
+                  onChange={(e) => setHolidayToDate(e.target.value)}
+                  min={holidayFromDate}
+                  className="w-full px-3 py-2 bg-dark-300 border border-dark-400 text-white rounded-lg focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+            </div>
+
+            {/* Availability Type */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-dark-600 mb-2">
+                Availability Type
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setHolidayType("closed")}
+                  className={`py-2 px-4 rounded-lg font-medium text-sm transition-all ${
+                    holidayType === "closed"
+                      ? "bg-red-600 text-white"
+                      : "bg-dark-300 text-dark-600 hover:bg-dark-400"
+                  }`}
+                >
+                  Closed
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHolidayType("custom")}
+                  className={`py-2 px-4 rounded-lg font-medium text-sm transition-all ${
+                    holidayType === "custom"
+                      ? "bg-primary-600 text-white"
+                      : "bg-dark-300 text-dark-600 hover:bg-dark-400"
+                  }`}
+                >
+                  Custom Hours
+                </button>
               </div>
             </div>
 
