@@ -8,7 +8,6 @@ interface SnapshotRequest {
   instructors: Array<{
     name: string;
     specialization: string;
-    avatarUrl?: string;
     statusText: string;
   }>;
 }
@@ -17,61 +16,6 @@ export async function POST(request: Request) {
   try {
     const body: SnapshotRequest = await request.json();
     const { studioName, date, instructors } = body;
-
-    // Empty state if no instructors available
-    if (instructors.length === 0) {
-      return new ImageResponse(
-        (
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              background: "linear-gradient(135deg, #09090b 0%, #18181b 100%)",
-              padding: "60px",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "48px",
-                fontWeight: "bold",
-                color: "#ffffff",
-                marginBottom: "24px",
-                textAlign: "center",
-              }}
-            >
-              {studioName}
-            </div>
-            <div
-              style={{
-                fontSize: "24px",
-                color: "#14b8a6",
-                fontWeight: "600",
-                marginBottom: "60px",
-              }}
-            >
-              {date}
-            </div>
-            <div
-              style={{
-                fontSize: "32px",
-                color: "#71717a",
-                textAlign: "center",
-              }}
-            >
-              No instructors available on this day
-            </div>
-          </div>
-        ),
-        {
-          width: 1080,
-          height: 1350,
-        }
-      );
-    }
 
     return new ImageResponse(
       (
@@ -82,7 +26,7 @@ export async function POST(request: Request) {
             display: "flex",
             flexDirection: "column",
             background: "linear-gradient(135deg, #09090b 0%, #18181b 100%)",
-            padding: "50px",
+            padding: "60px",
           }}
         >
           {/* Header */}
@@ -90,12 +34,12 @@ export async function POST(request: Request) {
             style={{
               display: "flex",
               flexDirection: "column",
-              marginBottom: "30px",
+              marginBottom: "40px",
             }}
           >
             <div
               style={{
-                fontSize: "48px",
+                fontSize: "52px",
                 fontWeight: "bold",
                 color: "#ffffff",
                 marginBottom: "8px",
@@ -106,18 +50,9 @@ export async function POST(request: Request) {
             </div>
             <div
               style={{
-                fontSize: "24px",
+                fontSize: "28px",
                 color: "#14b8a6",
                 fontWeight: "600",
-                marginBottom: "6px",
-              }}
-            >
-              Available Instructors
-            </div>
-            <div
-              style={{
-                fontSize: "20px",
-                color: "#a1a1aa",
               }}
             >
               {date}
@@ -128,84 +63,100 @@ export async function POST(request: Request) {
           <div
             style={{
               width: "100%",
-              height: "3px",
+              height: "4px",
               background: "linear-gradient(90deg, #14b8a6 0%, #0d9488 100%)",
-              marginBottom: "35px",
+              marginBottom: "40px",
               borderRadius: "2px",
             }}
           />
 
-          {/* Instructor Grid */}
+          {/* Instructor Table */}
           <div
             style={{
               display: "flex",
-              flexWrap: "wrap",
-              gap: "20px",
-              justifyContent: "space-between",
+              flexDirection: "column",
+              gap: "12px",
             }}
           >
-            {instructors.slice(0, 8).map((instructor, index) => (
+            {/* Table Header */}
+            <div
+              style={{
+                display: "flex",
+                backgroundColor: "#27272a",
+                padding: "18px 24px",
+                borderRadius: "12px",
+                border: "1px solid #3f3f46",
+              }}
+            >
+              <div
+                style={{
+                  flex: "2",
+                  fontSize: "22px",
+                  fontWeight: "600",
+                  color: "#a1a1aa",
+                }}
+              >
+                Instructor
+              </div>
+              <div
+                style={{
+                  flex: "1",
+                  fontSize: "22px",
+                  fontWeight: "600",
+                  color: "#a1a1aa",
+                }}
+              >
+                Specialization
+              </div>
+              <div
+                style={{
+                  flex: "2",
+                  fontSize: "22px",
+                  fontWeight: "600",
+                  color: "#a1a1aa",
+                }}
+              >
+                Status
+              </div>
+            </div>
+
+            {/* Table Rows */}
+            {instructors.slice(0, 12).map((instructor, index) => (
               <div
                 key={index}
                 style={{
                   display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  backgroundColor: "#18181b",
-                  padding: "24px",
-                  borderRadius: "16px",
-                  border: "2px solid #27272a",
-                  width: "450px",
+                  padding: "18px 24px",
+                  backgroundColor: index % 2 === 0 ? "#18181b" : "#09090b",
+                  borderRadius: "12px",
+                  border: "1px solid #27272a",
                 }}
               >
-                {/* Avatar */}
-                <img
-                  src={instructor.avatarUrl || "https://randomuser.me/api/portraits/lego/1.jpg"}
-                  alt={instructor.name}
-                  style={{
-                    width: "100px",
-                    height: "100px",
-                    borderRadius: "50%",
-                    border: "4px solid #14b8a6",
-                    marginBottom: "16px",
-                    objectFit: "cover",
-                  }}
-                />
-
-                {/* Name */}
                 <div
                   style={{
-                    fontSize: "22px",
-                    fontWeight: "bold",
-                    color: "#ffffff",
-                    marginBottom: "6px",
-                    textAlign: "center",
+                    flex: "2",
+                    fontSize: "20px",
+                    color: "#fafafa",
+                    fontWeight: "500",
                   }}
                 >
                   {instructor.name}
                 </div>
-
-                {/* Specialization */}
                 <div
                   style={{
-                    fontSize: "16px",
-                    color: "#14b8a6",
-                    marginBottom: "12px",
-                    textAlign: "center",
+                    flex: "1",
+                    fontSize: "18px",
+                    color: "#a1a1aa",
                   }}
                 >
                   {instructor.specialization}
                 </div>
-
-                {/* Available Hours */}
                 <div
                   style={{
-                    fontSize: "15px",
-                    color: "#a1a1aa",
-                    textAlign: "center",
-                    padding: "8px 12px",
-                    backgroundColor: "#27272a",
-                    borderRadius: "8px",
+                    flex: "2",
+                    fontSize: "18px",
+                    color: getStatusColor(instructor.statusText),
+                    fontWeight: "600",
                   }}
                 >
                   {instructor.statusText}
@@ -218,15 +169,14 @@ export async function POST(request: Request) {
           <div
             style={{
               marginTop: "auto",
-              paddingTop: "30px",
-              fontSize: "14px",
+              paddingTop: "40px",
+              fontSize: "16px",
               color: "#52525b",
               textAlign: "center",
               fontWeight: "500",
             }}
           >
-            Generated by Haya Studio Demo • {instructors.length} instructor
-            {instructors.length !== 1 ? "s" : ""} available
+            Generated by Haya Studio Demo
           </div>
         </div>
       ),
@@ -239,4 +189,14 @@ export async function POST(request: Request) {
     console.error("Error generating snapshot:", error);
     return new Response("Error generating snapshot", { status: 500 });
   }
+}
+
+function getStatusColor(statusText: string): string {
+  if (statusText.includes("On Leave")) {
+    return "#facc15";
+  }
+  if (statusText === "Not Available") {
+    return "#71717a";
+  }
+  return "#14b8a6";
 }

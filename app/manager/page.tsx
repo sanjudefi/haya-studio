@@ -69,31 +69,15 @@ export default function ManagerPage() {
     try {
       const dateObj = new Date(selectedDate + "T00:00:00");
 
-      // Filter for available instructors only
-      const availableInstructors = availability
-        .filter((a) => a.status === "available")
-        .map((a) => ({
-          name: a.name,
-          specialization: a.specialization,
-          avatarUrl: a.avatarUrl || "https://randomuser.me/api/portraits/lego/1.jpg",
-          statusText: a.text,
-        }));
-
-      // Notify if no instructors available
-      if (availableInstructors.length === 0) {
-        const proceed = confirm(
-          `No instructors are available on ${formatDateFull(dateObj)}. The snapshot will show an empty state. Do you want to continue?`
-        );
-        if (!proceed) {
-          setDownloading(false);
-          return;
-        }
-      }
-
+      // Send all instructors (no filtering)
       const payload = {
         studioName: DEMO_STUDIO.name,
         date: formatDateFull(dateObj),
-        instructors: availableInstructors,
+        instructors: availability.map((a) => ({
+          name: a.name,
+          specialization: a.specialization,
+          statusText: a.text,
+        })),
       };
 
       const response = await fetch("/api/snapshot", {
@@ -105,20 +89,10 @@ export default function ManagerPage() {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Snapshot API error:", errorText);
-        throw new Error(`Failed to generate snapshot: ${response.status}`);
+        throw new Error("Failed to generate snapshot");
       }
 
       const blob = await response.blob();
-
-      // Verify blob size
-      if (blob.size === 0) {
-        throw new Error("Generated image is empty");
-      }
-
-      console.log(`PNG generated successfully: ${blob.size} bytes, ${availableInstructors.length} instructors`);
-
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -129,7 +103,7 @@ export default function ManagerPage() {
       document.body.removeChild(a);
     } catch (error) {
       console.error("Error downloading snapshot:", error);
-      alert(`Failed to download snapshot: ${error instanceof Error ? error.message : "Unknown error"}. Check console for details.`);
+      alert("Failed to download snapshot. Please try again.");
     } finally {
       setDownloading(false);
     }
